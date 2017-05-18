@@ -163,7 +163,25 @@
         {
             var _this = this;
             var defer = $.Deferred();
+            // New polls API for voting
+            if (pollId && pollProfileId && userId && selectedAnswer) {
+                var vote = {
+                    "service": "poll_poll",
+                    "action": "vote",
+                    "pollId": pollId,
+                    "answerIds" : selectedAnswer, // 1
+                    "userId" : userId
+                };
+            }
+            _this.getKClient().doRequest(vote, function (result) {
 
+            }, false, function (reason) {
+                _this.log("rejecting request due to error from kaltura api server with reason " + (reason ? JSON.stringify(reason) : ''));
+                defer.reject();
+            });
+
+            return;
+            //Old API
             if (pollId && pollProfileId && userId && selectedAnswer) {
                 var createCuePointRequest = {
                     "service": "cuePoint_cuePoint",
