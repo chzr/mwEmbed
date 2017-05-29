@@ -20,7 +20,7 @@ $YB.adnalyzers.KalturaAds = function (plugin) {
   } catch (err) {
     $YB.error(err);
   }
-}
+};
 
 // Inheritance
 $YB.adnalyzers.KalturaAds.prototype = new $YB.adnalyzers.Generic();
@@ -39,7 +39,7 @@ $YB.adnalyzers.KalturaAds.prototype.getAdPlayhead = function () {
 };
 
 $YB.adnalyzers.KalturaAds.prototype.getAdPosition = function () {
-  var pos = this.ads.getPlayer().adTimeline.currentAdSlotType
+  var pos = this.ads.getPlayer().adTimeline.currentAdSlotType;
   switch (pos) {
     case 'preroll':
     case 'pre':
@@ -47,6 +47,9 @@ $YB.adnalyzers.KalturaAds.prototype.getAdPosition = function () {
     case 'postroll':
     case 'post':
       return 'post';
+    case 'bumperPreSeq':
+    case 'bumperPostSeq':
+      return 'bumper';
     default:
       return 'mid';
   }
@@ -83,13 +86,21 @@ $YB.adnalyzers.KalturaAds.prototype.registerListeners = function () {
       adnalyzer.playhead = currentTime;
     });
 
+    this.ads.bind( 'onPlayerStateChange', function ( event, newState ) {
+          if ( newState === "pause" ) {
+              adnalyzer.pauseAdHandler();
+          } else if ( newState === "play" ) {
+              adnalyzer.resumeAdHandler();
+          }
+    } );
+
     this.ads.bind('onAdComplete', function () {
       adnalyzer.endedAdHandler();
       adnalyzer.resetValues();
     });
 
     this.ads.bind('onAdSkip', function () {
-      adnalyzer.endedAdHandler({ skipped: true });
+      adnalyzer.skipAdHandler();
       adnalyzer.resetValues();
     });
 
